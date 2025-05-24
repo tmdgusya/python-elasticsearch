@@ -35,11 +35,48 @@ async def create_user(user: UserCreateRequestDto):
     await client.indices.refresh(index="users")
     return {"message": "User created", "user": user_doc}
 
+@app.get("/users")
+async def list_users():
+    response = await client.search(index="users", query={"match_all": {}})
+    user_docs = []
+    for hit in response['hits']['hits']:
+        id = hit['_id']
+        source = hit['_source']
+        user_doc = UserDocument(id=id, name=source['name'], age=source['age'], is_active=source.get('is_active', False))
+        user_docs.append(user_doc)
+    return {"users": user_docs}
+
 @app.get("/users/{user_id}")
 async def get_user(user_id: str):
     response = await client.get(index="users", id=user_id)
     if response['found']:
         user_doc = UserDocument(**response['_source'])
         return {"user": user_doc}
+    else:
+        return {"message": "User not found"}, 404
+    
+@app.put("/users/{user_id}")
+async def update_user(user_id: str, user: UserCreateRequestDto):
+    user_doc = UserDocument(
+        id=user_id,
+        name=user.name,
+        age=user.age,
+        is_active=user.is_active
+    )
+    response = await client.update(
+        index="users",
+        id=user_id,
+        doc=user_doc.__dict__
+    )
+    if response['result'] == 'updated':
+        return {"message": "User updated", "user": user_doc}
+    else:
+        return {"message": "User not found"}, 404
+    
+@app.delete("/users/{user_id}")
+async def delete_user(user_id: str):
+    response = await client.delete(index="users", id=user_id)
+    if response['result'] == 'deleted':
+        return {"message": "User deleted"}
     else:
         return {"message": "User not found"}, 404
