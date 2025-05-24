@@ -1,6 +1,8 @@
 services:
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.4 # 8.17.4 버전
+    build:
+      context: . # 현재 디렉토리에서 Dockerfile을 찾음
+      dockerfile: Dockerfile # Dockerfile 이름 지정
     ports:
       - 9200:9200 # 9200번 포트에서 Elasticsearch 실행
     environment:
