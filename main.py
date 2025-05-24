@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from elasticsearch import Elasticsearch
+# from elasticsearch import Elasticsearch
+from elasticsearch import AsyncElasticsearch
 
 @dataclass
 class UserDocument:
@@ -8,8 +9,8 @@ class UserDocument:
     age: int # fieldType.long
     is_active: bool # fieldType.boolean
 
-def main():
-    client = Elasticsearch(
+async def main():
+    client = AsyncElasticsearch(
         "http://localhost:9200",
         api_key="api_key",
     )
@@ -18,10 +19,11 @@ def main():
         raise Exception("Elasticsearch client not initialized")
 
     try:
-        info = client.info()
+        info = await client.info()
         print(info)
     finally:
-        client.close()
+        await client.close()
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())
