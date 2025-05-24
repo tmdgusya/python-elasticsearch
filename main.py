@@ -3,9 +3,10 @@ from elasticsearch import Elasticsearch
 
 @dataclass
 class UserDocument:
-    id: int
-    name: str
-    email: str
+    id: str # id
+    name: str # fieldType.keyword
+    age: int # fieldType.long
+    is_active: bool # fieldType.boolean
 
 def main():
     client = Elasticsearch(
